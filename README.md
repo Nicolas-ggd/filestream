@@ -6,6 +6,8 @@
 ![Version](https://img.shields.io/github/v/release/Nicolas-ggd/filestream)
 
 # FileStream: Event-Driven File Upload Engine
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream?ref=badge_shield)
+
 
 FileStream is an open-source project, which is aim to gain more experience in golang, the purpose of this project is to build robust file upload systems that are efficient, resumable, and ready for real-time integrations.
 
@@ -50,3 +52,5 @@ Here’s how you can get involved:
    
 ## License
 FileStream is open-source software licensed under the MIT License.
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream?ref=badge_large)
