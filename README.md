@@ -1,3 +1,10 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/Nicolas-ggd/filestream)](https://goreportcard.com/report/github.com/Nicolas-ggd/filestream)
+![Go Version](https://img.shields.io/github/go-mod/go-version/Nicolas-ggd/filestream)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream?ref=badge_shield&issueType=license)
+![License](https://img.shields.io/github/license/Nicolas-ggd/filestream)
+![Issues Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
+![Version](https://img.shields.io/github/v/release/Nicolas-ggd/filestream)
+
 # FileStream: Event-Driven File Upload Engine
 
 FileStream is an open-source project, which is aim to gain more experience in golang, the purpose of this project is to build robust file upload systems that are efficient, resumable, and ready for real-time integrations.
