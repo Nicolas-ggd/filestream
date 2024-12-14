@@ -1,0 +1,40 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go-specific
+/bin/
+/.env
+
+# Dependency files
+vendor/
+
+# Logs and debugging
+*.log
+*.out
+*.tmp
+
+# Test binaries
+*.test
+
+# Generated files
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Temporary files
+*.tmp
+*.cache
+*.bak
+*.old
+
+# Build directories
+/dist/
+/build/
