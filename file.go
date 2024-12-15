@@ -57,7 +57,11 @@ func (r *File) generateUuidUniqueName(request *RFileRequest) {
 
 // RemoveUploadedFile function removes uploaded file from uploaded directory, it takes param and returns nothing:
 //
-// RFileRequest struct
+// Takes:
+//
+//   - RFileRequest struct
+//
+// Use this function in your handler after file is uploaded
 func RemoveUploadedFile(r *RFileRequest) {
 	filePath := filepath.Join(r.UploadDirectory, r.UploadFile.Filename)
 
@@ -83,11 +87,11 @@ func prettyByteSize(b int) string {
 
 // StoreChunk cares slice of chunks and returns final results and error
 //
-//	File -  struct is final version about file information
+//   - File -  struct is final version about file information
 //
-//	error - functions cares about errors and returns error
+//   - error - functions cares about occurred errors and returns it.
 //
-//	function creates new directory for chunks if it doesn't exist, if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
+// Function creates new directory for chunks if it doesn't exist, if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
 func StoreChunk(r *RFileRequest) (*File, error) {
 	var rFile *File
 
@@ -143,13 +147,13 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 
 // IsAllowExtension function checks if file extension is allowed to upload, it takes following params
 //
-// fileExtensions - array of strings, which is looks like: []string{".jpg", ".jpeg"}, note that this is fileExtensions which is allowed to receive
+//   - fileExtensions - array of strings, which is looks like: []string{".jpg", ".jpeg"}, note that this is fileExtensions which is allowed to receive
 //
-// fileName - string, this parameter is file name which is like ".jpeg", ".jpg"
+//   - fileName - string, this parameter is file name which is like ".jpeg", ".jpg"
 //
 // Returns:
 //
-// bool - function returns false if extension isn't allowed to receive, it returns true if extension is allowed to receive
+//   - bool - function returns false if extension isn't allowed to receive, it returns true if extension is allowed to receive
 func IsAllowExtension(fileExtensions []string, fileName string) bool {
 	ext := strings.ToLower(filepath.Ext(fileName))
 
