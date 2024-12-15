@@ -18,7 +18,7 @@ type File struct {
 	// Original uploaded file name
 	FileName string
 	// FileUniqueName is unique name
-	FileUniqueName string
+	FileUniqueName *string
 	// Uploaded file path
 	FilePath string
 	// Uploaded file extension
@@ -43,8 +43,8 @@ type RFileRequest struct {
 	FileUniqueName bool
 }
 
-// generateUuidUniqueName function generates unique string using UUID
-func (r *File) generateUuidUniqueName(request *RFileRequest) {
+// uniqueName function generates unique string using UUID
+func uniqueName(request *RFileRequest) string {
 	ext := filepath.Ext(request.UploadFile.Filename)
 
 	id, err := uuid.NewUUID()
@@ -52,12 +52,16 @@ func (r *File) generateUuidUniqueName(request *RFileRequest) {
 		log.Fatalln(err)
 	}
 
-	r.FileUniqueName = fmt.Sprintf("%s%s", id.String(), ext)
+	return fmt.Sprintf("%s%s", id.String(), ext)
 }
 
 // RemoveUploadedFile function removes uploaded file from uploaded directory, it takes param and returns nothing:
 //
-// RFileRequest struct
+// Takes:
+//
+//   - RFileRequest struct
+//
+// Use this function in your handler after file is uploaded
 func RemoveUploadedFile(r *RFileRequest) {
 	filePath := filepath.Join(r.UploadDirectory, r.UploadFile.Filename)
 
@@ -83,11 +87,11 @@ func prettyByteSize(b int) string {
 
 // StoreChunk cares slice of chunks and returns final results and error
 //
-//	File -  struct is final version about file information
+//   - File -  struct is final version about file information
 //
-//	error - functions cares about errors and returns error
+//   - error - functions cares about occurred errors and returns it.
 //
-//	function creates new directory for chunks if it doesn't exist, if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
+// Function creates new directory for chunks if it doesn't exist, if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
 func StoreChunk(r *RFileRequest) (*File, error) {
 	var rFile *File
 
@@ -114,7 +118,7 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 	}()
 
 	// Copy the chunk data to the file
-	if _, err := io.Copy(f, r.File); err != nil {
+	if _, err = io.Copy(f, r.File); err != nil {
 		return nil, fmt.Errorf("failed to copying file: %v", err)
 	}
 
@@ -128,13 +132,18 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 		// Calculate file size in bytes
 		size := prettyByteSize(int(fileInfo.Size()))
 
+		// Check if FileUniqueName field is true to generate unique name for file
+		if r.FileUniqueName {
+			uName := uniqueName(r)
+			rFile.FileUniqueName = &uName
+		}
+
 		// Bind File struct and return
 		rFile = &File{
-			FileName:       r.UploadFile.Filename,
-			FileUniqueName: r.UploadFile.Filename,
-			FilePath:       filePath,
-			FileExtension:  filepath.Ext(r.UploadFile.Filename),
-			FileSize:       size,
+			FileName:      r.UploadFile.Filename,
+			FilePath:      filePath,
+			FileExtension: filepath.Ext(r.UploadFile.Filename),
+			FileSize:      size,
 		}
 	}
 
@@ -143,13 +152,13 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 
 // IsAllowExtension function checks if file extension is allowed to upload, it takes following params
 //
-// fileExtensions - array of strings, which is looks like: []string{".jpg", ".jpeg"}, note that this is fileExtensions which is allowed to receive
+//   - fileExtensions - array of strings, which is looks like: []string{".jpg", ".jpeg"}, note that this is fileExtensions which is allowed to receive
 //
-// fileName - string, this parameter is file name which is like ".jpeg", ".jpg"
+//   - fileName - string, this parameter is file name which is like ".jpeg", ".jpg"
 //
 // Returns:
 //
-// bool - function returns false if extension isn't allowed to receive, it returns true if extension is allowed to receive
+//   - bool - function returns false if extension isn't allowed to receive, it returns true if extension is allowed to receive
 func IsAllowExtension(fileExtensions []string, fileName string) bool {
 	ext := strings.ToLower(filepath.Ext(fileName))
 

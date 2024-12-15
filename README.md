@@ -43,10 +43,75 @@ Here’s how you can get involved:
     ```
    make test
    ```
-4. To start application run:
-   ```
-   make start
-   ```
+   
+## Usage
+```go
+import(
+    "github.com/gin-gonic/gin"
+    "github.com/Nicolas-ggd/filestream"
+)
+
+func Upload(c *gin.Context) {
+   // Retrieve the uploaded file
+   uploadFile, err := c.FormFile("file")
+   if err != nil {
+     c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get file"})
+     return
+   }
+
+   // Open the uploaded file
+   file, err := uploadFile.Open()
+   if err != nil {
+     fmt.Println("Error opening uploaded file:", err)
+     c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open uploaded file"})
+     return
+   }
+   
+   defer file.Close()
+
+
+   // Construct the FileRequest
+   fileReq := fstream.RFileRequest{
+       File:            file,
+       UploadFile:      uploadFile,
+       MaxRange:        rangeMax,
+       FileSize:        fileSize,
+       UploadDirectory: "uploads/",
+       FileUniqueName:  true, // remember that if you set true here, you will receive unique name file
+   }
+
+
+   // Call StoreChunk to handle the uploaded chunk
+   prFile, err := fstream.StoreChunk(&fileReq)
+   if err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{"error": "failed to store chunk"})
+      return
+   }
+   
+   // You can write your own if statement to check whatever you want
+   if isLast {
+    // You can perform your own logic here, before return 200 status, 
+    // it's better to remove chunks which is uploaded and doesn't use anymore
+     fstream.RemoveUploadedFile(&fileReq)
+   }
+
+   c.JSON(http.StatusOK, gin.H{"message": "file chunk processed"})
+}
+```
+
+`fstream` offers extension check, all you need is that to provide which extension do you want to allow
+
+```go
+   import(
+     "github.com/Nicolas-ggd/filestream"
+   )
+
+    // Declare extension slice, slice contains all file extension which is ok for you to allow in your system
+    var allowExtensions = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+
+    // This function is very simple, but save your time to compare extension and current file to known if it's valid for you
+    fstream.IsAllowExtension(allowExtensions, "filename.png")
+```
    
 ## License
 FileStream is open-source software licensed under the MIT License.
