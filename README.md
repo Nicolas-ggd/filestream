@@ -43,10 +43,61 @@ Here’s how you can get involved:
     ```
    make test
    ```
-4. To start application run:
-   ```
-   make start
-   ```
+   
+## Usage
+```go
+import(
+    "github.com/gin-gonic/gin"
+    "github.com/Nicolas-ggd/filestream"
+)
+
+func Upload(c *gin.Context) {
+   // Retrieve the uploaded file
+   uploadFile, err := c.FormFile("file")
+   if err != nil {
+     c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get file"})
+     return
+   }
+
+   // Open the uploaded file
+   file, err := uploadFile.Open()
+   if err != nil {
+     fmt.Println("Error opening uploaded file:", err)
+     c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to open uploaded file"})
+     return
+   }
+   
+   defer file.Close()
+
+
+   // Construct the FileRequest
+   fileReq := fstream.RFileRequest{
+       File:            file,
+       UploadFile:      uploadFile,
+       MaxRange:        rangeMax,
+       FileSize:        fileSize,
+       UploadDirectory: "uploads/",
+       FileUniqueName:  true, // remember that if you set true here, you will receive unique name file
+   }
+
+
+   // Call StoreChunk to handle the uploaded chunk
+   prFile, err := fstream.StoreChunk(&fileReq)
+   if err != nil {
+      c.JSON(http.StatusBadRequest, gin.H{"error": "failed to store chunk"})
+      return
+   }
+   
+   // You can write your own if statement to check whatever you want
+   if isLast {
+    // You can perform your own logic here, before return 200 status, 
+    // it's better to remove chunks which is uploaded and doesn't use anymore
+     fstream.RemoveUploadedFile(&fileReq)
+   }
+
+   c.JSON(http.StatusOK, gin.H{"message": "file chunk processed"})
+}
+```
    
 ## License
 FileStream is open-source software licensed under the MIT License.

@@ -18,7 +18,7 @@ type File struct {
 	// Original uploaded file name
 	FileName string
 	// FileUniqueName is unique name
-	FileUniqueName string
+	FileUniqueName *string
 	// Uploaded file path
 	FilePath string
 	// Uploaded file extension
@@ -43,8 +43,8 @@ type RFileRequest struct {
 	FileUniqueName bool
 }
 
-// generateUuidUniqueName function generates unique string using UUID
-func (r *File) generateUuidUniqueName(request *RFileRequest) {
+// uniqueName function generates unique string using UUID
+func uniqueName(request *RFileRequest) string {
 	ext := filepath.Ext(request.UploadFile.Filename)
 
 	id, err := uuid.NewUUID()
@@ -52,7 +52,7 @@ func (r *File) generateUuidUniqueName(request *RFileRequest) {
 		log.Fatalln(err)
 	}
 
-	r.FileUniqueName = fmt.Sprintf("%s%s", id.String(), ext)
+	return fmt.Sprintf("%s%s", id.String(), ext)
 }
 
 // RemoveUploadedFile function removes uploaded file from uploaded directory, it takes param and returns nothing:
@@ -118,7 +118,7 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 	}()
 
 	// Copy the chunk data to the file
-	if _, err := io.Copy(f, r.File); err != nil {
+	if _, err = io.Copy(f, r.File); err != nil {
 		return nil, fmt.Errorf("failed to copying file: %v", err)
 	}
 
@@ -132,13 +132,18 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 		// Calculate file size in bytes
 		size := prettyByteSize(int(fileInfo.Size()))
 
+		// Check if FileUniqueName field is true to generate unique name for file
+		if r.FileUniqueName {
+			uName := uniqueName(r)
+			rFile.FileUniqueName = &uName
+		}
+
 		// Bind File struct and return
 		rFile = &File{
-			FileName:       r.UploadFile.Filename,
-			FileUniqueName: r.UploadFile.Filename,
-			FilePath:       filePath,
-			FileExtension:  filepath.Ext(r.UploadFile.Filename),
-			FileSize:       size,
+			FileName:      r.UploadFile.Filename,
+			FilePath:      filePath,
+			FileExtension: filepath.Ext(r.UploadFile.Filename),
+			FileSize:      size,
 		}
 	}
 
