@@ -110,7 +110,11 @@ func Upload(c *gin.Context) {
     var allowExtensions = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
 
     // This function is very simple, but save your time to compare extension and current file to known if it's valid for you
-    fstream.IsAllowExtension(allowExtensions, "filename.png")
+    allowed := fstream.IsAllowExtension(allowExtensions, "filename.png")
+	
+    if allowed {
+     // your logic goes here...	
+    }
 ```
    
 ## License
