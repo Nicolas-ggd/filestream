@@ -98,6 +98,20 @@ func Upload(c *gin.Context) {
    c.JSON(http.StatusOK, gin.H{"message": "file chunk processed"})
 }
 ```
+
+`fstream` offers extension check, all you need is that to provide which extension do you want to allow
+
+```go
+   import(
+     "github.com/Nicolas-ggd/filestream"
+   )
+
+    // Declare extension slice, slice contains all file extension which is ok for you to allow in your system
+    var allowExtensions = []string{".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+
+    // This function is very simple, but save your time to compare extension and current file to known if it's valid for you
+    fstream.IsAllowExtension(allowExtensions, "filename.png")
+```
    
 ## License
 FileStream is open-source software licensed under the MIT License.
