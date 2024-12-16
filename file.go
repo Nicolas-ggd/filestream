@@ -44,8 +44,8 @@ type RFileRequest struct {
 }
 
 // uniqueName function generates unique string using UUID
-func uniqueName(request *RFileRequest) string {
-	ext := filepath.Ext(request.UploadFile.Filename)
+func uniqueName(fileName string) string {
+	ext := filepath.Ext(fileName)
 
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -55,20 +55,26 @@ func uniqueName(request *RFileRequest) string {
 	return fmt.Sprintf("%s%s", id.String(), ext)
 }
 
-// RemoveUploadedFile function removes uploaded file from uploaded directory, it takes param and returns nothing:
+// RemoveUploadedFile function removes uploaded file from uploaded directory and returns error if something went wrong:
 //
 // Takes:
 //
-//   - RFileRequest struct
+//   - uploadDir (string) - upload directory where file lives
+//   - fileName (string) - file name
+//
+// Returns:
+//   - error if something went wrong, in this case if file doesn't removed function returns error
 //
 // Use this function in your handler after file is uploaded
-func RemoveUploadedFile(r *RFileRequest) {
-	filePath := filepath.Join(r.UploadDirectory, r.UploadFile.Filename)
+func RemoveUploadedFile(uploadDir, fileName string) error {
+	filePath := filepath.Join(uploadDir, fileName)
 
-	e := os.Remove(filePath)
-	if e != nil {
-		log.Printf("error removing file: %v", e)
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
 	}
+
+	return nil
 }
 
 // prettyByteSize function is used to concrete the file size
@@ -134,7 +140,7 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 
 		// Check if FileUniqueName field is true to generate unique name for file
 		if r.FileUniqueName {
-			uName := uniqueName(r)
+			uName := uniqueName(r.UploadFile.Filename)
 			rFile.FileUniqueName = &uName
 		}
 
