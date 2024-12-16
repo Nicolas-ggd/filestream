@@ -92,7 +92,10 @@ func Upload(c *gin.Context) {
    if isLast {
     // You can perform your own logic here, before return 200 status, 
     // it's better to remove chunks which is uploaded and doesn't use anymore
-     fstream.RemoveUploadedFile(&fileReq)
+     err = fstream.RemoveUploadedFile("/dir", "filename.jpeg")
+     if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err})	 
+     }
    }
 
    c.JSON(http.StatusOK, gin.H{"message": "file chunk processed"})
