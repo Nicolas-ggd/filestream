@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"image"
+	"image/jpeg"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -176,6 +178,68 @@ func TestStoreChunk(t *testing.T) {
 				assert.Equal(t, fileHeader.Filename, resFile.FileName)
 				assert.Equal(t, expectedFilePath, resFile.FilePath)
 				assert.Equal(t, filepath.Ext(fileHeader.Filename), resFile.FileExtension)
+			}
+		})
+	}
+}
+
+func TestRemoveExifMetadata(t *testing.T) {
+	testCases := []struct {
+		name        string
+		setupFunc   func() (string, error)
+		expectError bool
+	}{
+		{
+			name: "Exif metadata removed successfully",
+			setupFunc: func() (string, error) {
+				file, err := os.CreateTemp("", "*.jpg")
+				if err != nil {
+					return "", err
+				}
+				defer file.Close()
+
+				// create dummy image
+				img := image.NewRGBA(image.Rect(0, 0, 100, 100))
+				if err := jpeg.Encode(file, img, nil); err != nil {
+					return "", err
+				}
+				return file.Name(), nil
+			},
+			expectError: false,
+		},
+		{
+			name: "failed to open image",
+			setupFunc: func() (string, error) {
+				return "invalid_path.jpg", nil
+			},
+			expectError: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			inputPath, err := tc.setupFunc()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = RemoveExifMetadata(inputPath)
+			if tc.expectError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+
+				// Validate output file
+				file, err := os.Open(inputPath)
+				assert.NoError(t, err)
+				defer file.Close()
+
+				_, _, err = image.Decode(file)
+				assert.NoError(t, err)
+			}
+
+			if _, err = os.Stat(inputPath); err == nil {
+				os.Remove(inputPath)
 			}
 		})
 	}
