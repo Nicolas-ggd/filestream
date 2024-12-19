@@ -1,5 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/Nicolas-ggd/filestream)](https://goreportcard.com/report/github.com/Nicolas-ggd/filestream)
 ![Go Version](https://img.shields.io/github/go-mod/go-version/Nicolas-ggd/filestream)
+[![Go Reference](https://pkg.go.dev/badge/github.com/Nicolas-ggd/filestream.svg)](https://pkg.go.dev/github.com/Nicolas-ggd/filestream)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2FNicolas-ggd%2Ffilestream?ref=badge_shield&issueType=license)
 ![License](https://img.shields.io/github/license/Nicolas-ggd/filestream)
 ![Issues Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)
@@ -11,7 +12,10 @@ FileStream is an open-source project, which is aim to gain more experience in go
 
 ## Purpose of this project
 
-This project was born from a desire to learn Go deeply while building something practical and useful. My aim is to enhance my skills and gain real world experience by working on an open-source project that can also attract contributions from others who share the same passion. This project is learning journey for me and developers also which decide to collaborating and create a reusable engine.
+This project was born from a desire to learn Go deeply while building something practical and useful. The aim is to:
+- Enhance skills in Go by working on a real-world project.
+- Build a reusable, efficient engine for file uploads.
+- Attract contributions from developers passionate about open-source collaboration.
 
 ## Roadmap
 
@@ -35,16 +39,9 @@ Here’s how you can get involved:
     ```
     git clone https://github.com/Nicolas-ggd/filestream
     ```
-2. Install dependencies:
-    ```
-   make dependencies
-   ```
-3. Run tests:
-    ```
-   make test
-   ```
    
 ## Usage
+Basic File Upload Example:
 ```go
 import(
     "github.com/gin-gonic/gin"
@@ -102,8 +99,7 @@ func Upload(c *gin.Context) {
 }
 ```
 
-`fstream` offers extension check, all you need is that to provide which extension do you want to allow
-
+Validate File Extensions:
 ```go
    import(
      "github.com/Nicolas-ggd/filestream"
@@ -118,6 +114,19 @@ func Upload(c *gin.Context) {
     if allowed {
      // your logic goes here...	
     }
+```
+
+Remove EXIF Metadata:
+```go
+   import(
+     "github.com/Nicolas-ggd/filestream"
+   )
+
+   // filePath is the upload direction + filename
+   err := fstream.RemoveExifMetadata(filePath)
+   if err != nil {
+     log.Fatalln(err)	
+   }
 ```
    
 ## License

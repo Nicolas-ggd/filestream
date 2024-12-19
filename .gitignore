@@ -34,7 +34,10 @@ vendor/
 *.cache
 *.bak
 *.old
-/test
+/_test
+test
+/uploads
+uploads
 
 # Build directories
 /dist/

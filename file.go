@@ -2,6 +2,8 @@ package fstream
 
 import (
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"math"
@@ -18,7 +20,7 @@ type File struct {
 	// Original uploaded file name
 	FileName string
 	// FileUniqueName is unique name
-	FileUniqueName *string
+	FileUniqueName string
 	// Uploaded file path
 	FilePath string
 	// Uploaded file extension
@@ -55,16 +57,8 @@ func uniqueName(fileName string) string {
 	return fmt.Sprintf("%s%s", id.String(), ext)
 }
 
-// RemoveUploadedFile function removes uploaded file from uploaded directory and returns error if something went wrong:
-//
-// Takes:
-//
-//   - uploadDir (string) - upload directory where file lives
-//   - fileName (string) - file name
-//
-// Returns:
-//   - error if something went wrong, in this case if file doesn't removed function returns error
-//
+// RemoveUploadedFile removes uploaded file from uploaded directory and returns error if something went wrong,
+// it takes upload directory and fileName.
 // Use this function in your handler after file is uploaded
 func RemoveUploadedFile(uploadDir, fileName string) error {
 	filePath := filepath.Join(uploadDir, fileName)
@@ -91,13 +85,9 @@ func prettyByteSize(b int) string {
 	return fmt.Sprintf("%.1fYiB", bf)
 }
 
-// StoreChunk cares slice of chunks and returns final results and error
-//
-//   - File -  struct is final version about file information
-//
-//   - error - functions cares about occurred errors and returns it.
-//
-// Function creates new directory for chunks if it doesn't exist, if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
+// StoreChunk cares slice of chunks and returns final results and error.
+// Functions creates new directory for chunks if it doesn't exist,
+// if directory already exists it appends received chunks in current chunks and if entire file is uploaded then File struct is returned
 func StoreChunk(r *RFileRequest) (*File, error) {
 	var rFile *File
 
@@ -138,12 +128,6 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 		// Calculate file size in bytes
 		size := prettyByteSize(int(fileInfo.Size()))
 
-		// Check if FileUniqueName field is true to generate unique name for file
-		if r.FileUniqueName {
-			uName := uniqueName(r.UploadFile.Filename)
-			rFile.FileUniqueName = &uName
-		}
-
 		// Bind File struct and return
 		rFile = &File{
 			FileName:      r.UploadFile.Filename,
@@ -151,20 +135,18 @@ func StoreChunk(r *RFileRequest) (*File, error) {
 			FileExtension: filepath.Ext(r.UploadFile.Filename),
 			FileSize:      size,
 		}
+
+		// Check if FileUniqueName field is true to generate unique name for file
+		if r.FileUniqueName {
+			uName := uniqueName(r.UploadFile.Filename)
+			rFile.FileUniqueName = uName
+		}
 	}
 
 	return rFile, nil
 }
 
-// IsAllowExtension function checks if file extension is allowed to upload, it takes following params
-//
-//   - fileExtensions - array of strings, which is looks like: []string{".jpg", ".jpeg"}, note that this is fileExtensions which is allowed to receive
-//
-//   - fileName - string, this parameter is file name which is like ".jpeg", ".jpg"
-//
-// Returns:
-//
-//   - bool - function returns false if extension isn't allowed to receive, it returns true if extension is allowed to receive
+// IsAllowExtension checks if a given file's extension is allowed based on a provided list of acceptable extensions.
 func IsAllowExtension(fileExtensions []string, fileName string) bool {
 	ext := strings.ToLower(filepath.Ext(fileName))
 
@@ -176,4 +158,33 @@ func IsAllowExtension(fileExtensions []string, fileName string) bool {
 	}
 
 	return false
+}
+
+// RemoveExifMetadata returns error if something went wrong during the exif metadata removal process, functions takes inputPath which is location of the image.
+// purpose of this function is that to open and re-encode image without metadata
+func RemoveExifMetadata(inputPath string) error {
+	// open input path file
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return fmt.Errorf("failed to open image: %v", err)
+	}
+	defer file.Close()
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		return fmt.Errorf("failed to decode image: %v", err)
+	}
+
+	output, err := os.Create(inputPath)
+	if err != nil {
+		return fmt.Errorf("failed to create output file: %v", err)
+	}
+	defer output.Close()
+
+	// re-encode image without metadata
+	if err = jpeg.Encode(output, img, &jpeg.Options{Quality: 100}); err != nil {
+		return fmt.Errorf("failed to encode image: %v", err)
+	}
+
+	return nil
 }
